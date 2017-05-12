@@ -1,4 +1,3 @@
-import numpy as np
 import pyglet
 from pyglet.gl import *
 import gym

@@ -1,4 +1,9 @@
-# Gym Env Practice
+# OpenAI Gym Practice
+
+## Setup
+```
+$ pip install -e .
+```
 
 ## Run Flappy
 ```
