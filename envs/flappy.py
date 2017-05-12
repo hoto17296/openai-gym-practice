@@ -1,23 +1,21 @@
 import numpy as np
+import pyglet
+from pyglet.gl import *
 import gym
-from gym import error, spaces, utils
-from gym.utils import seeding
-from gym.envs.classic_control import rendering
+from gym import spaces
+from gym.envs.classic_control.rendering import Transform, make_circle
 
 class Flappy(gym.Env):
     metadata = {'render.modes': ['human']}
 
     def __init__(self):
-        self.state = None
-        self.viewer = None
-        self.action_space = spaces.Discrete(2)
-        self.screen_width = 400
-        self.screen_height = 600
-        self.threshold = 0
-        self.circle_width = 10
+        self.window = pyglet.window.Window(width=480, height=640)
+        self.actions = spaces.Discrete(2)
+        self.circle_radius = 10
 
     def _step(self, action):
-        assert self.action_space.contains(action), "%r (%s) invalid"%(action, type(action))
+        assert self.actions.contains(action), "%r (%s) invalid"%(action, type(action))
+
         pos, accel = self.state
 
         if action:
@@ -27,33 +25,63 @@ class Flappy(gym.Env):
         pos += accel
 
         self.state = [pos, accel]
+
         reward = 1.0
-        done = pos < self.threshold or pos > (self.screen_height - self.threshold)
+        done = pos < self.circle_radius or pos > self.window.height
         info = {}
 
-        return np.array(self.state), reward, done, info
+        return self.state, reward, done, info
 
     def _reset(self):
-        self.state = [self.screen_height / 2, 0]
-        return np.array(self.state)
+        self.state = [self.window.height - self.circle_radius, 0]
+        return self.state
 
     def _render(self, mode='human', close=False):
         if close:
-            if self.viewer is not None:
-                self.viewer.close()
-                self.viewer = None
+            self.window.close()
             return
+
+        self.window.clear()
+        self.window.switch_to()
+        self.window.dispatch_events()
+
+        self.render_background()
 
         pos, accel = self.state
 
-        if self.viewer is None:
-            self.viewer = rendering.Viewer(self.screen_width, self.screen_height)
-            self.trans = rendering.Transform()
-            self.circle = rendering.make_circle(self.circle_width)
-            self.circle.set_color(.3, .3, 1.0)
-            self.circle.add_attr(self.trans)
-            self.viewer.add_geom(self.circle)
+        geom = make_circle(self.circle_radius)
+        geom.add_attr(Transform(translation=(self.window.width/2, pos)))
+        geom.render()
 
-        self.trans.set_translation(self.screen_width / 2, pos)
+        self.window.flip()
 
-        return self.viewer.render(return_rgb_array = mode=='rgb_array')
+    def render_background(self):
+        glClearColor(1,1,1,1) # White
+
+if __name__ == '__main__':
+    from pyglet.window import key as KEY
+
+    env = Flappy()
+
+    action = False
+
+    def key_press(key, mod):
+        global action
+        if key == KEY.SPACE:
+            action = True
+
+    def key_release(key, mod):
+        global action
+        if key == KEY.SPACE:
+            action = False
+
+    env.unwrapped.window.on_key_press = key_press
+    env.unwrapped.window.on_key_release = key_release
+
+    while True:
+        observation = env.reset()
+        done = False
+        while not done:
+            env.render()
+            print(observation, action)
+            observation, reward, done, info = env.step(action)
