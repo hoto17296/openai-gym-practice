@@ -9,12 +9,13 @@ ENV LD_LIBRARY_PATH /usr/local/_nvidia/lib:/usr/local/_nvidia/lib64
 
 # create fake display
 RUN echo 'Xvfb :1 -screen 0 800x600x24 +extension GLX &' >> /entrypoint.sh
-RUN echo 'exec "$@"' >> /entrypoint.sh
 ENV DISPLAY :1
 
 WORKDIR /app
 ADD . /app
 RUN pip install -e .
 
-CMD ["bash"]
+RUN echo 'exec "$@"' >> /entrypoint.sh
 ENTRYPOINT ["bash", "/entrypoint.sh"]
+
+CMD ["bash"]
