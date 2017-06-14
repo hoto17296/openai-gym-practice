@@ -1,16 +1,14 @@
 import numpy as np
 import pyglet
-from pyglet.gl import *
 import gym
-from gym import spaces
-from gym.envs.classic_control.rendering import Transform, make_circle
+from gym.envs.classic_control import rendering
 
 class Flappy(gym.Env):
     metadata = {'render.modes': ['human']}
 
     def __init__(self):
         self.window = pyglet.window.Window(width=480, height=640)
-        self.actions = spaces.Discrete(2)
+        self.actions = gym.spaces.Discrete(2)
         self.barrage = []
         self.circle_radius = 10
 
@@ -72,8 +70,8 @@ class Flappy(gym.Env):
 
         pos, accel = self.state
 
-        geom = make_circle(self.circle_radius)
-        geom.add_attr(Transform(translation=(self.window.width/2, pos)))
+        geom = rendering.make_circle(self.circle_radius)
+        geom.add_attr(rendering.Transform(translation=(self.window.width/2, pos)))
         geom.render()
 
         for bullet in self.barrage:
@@ -82,7 +80,7 @@ class Flappy(gym.Env):
         self.window.flip()
 
     def render_background(self):
-        glClearColor(1,1,1,1) # White
+        pyglet.gl.glClearColor(1,1,1,1) # White
 
 
 class Bullet:
@@ -100,8 +98,8 @@ class Bullet:
 
     def render(self):
         if self.geom is None:
-            self.geom = make_circle(self.radius)
-            self.trans = Transform()
+            self.geom = rendering.make_circle(self.radius)
+            self.trans = rendering.Transform()
             self.geom.add_attr(self.trans)
         x, y = self.pos
         self.trans.set_translation(x, y)
@@ -109,7 +107,7 @@ class Bullet:
 
 
 if __name__ == '__main__':
-    from pyglet.window import key as KEY
+    KEY = pyglet.window.key
 
     env = Flappy()
 
