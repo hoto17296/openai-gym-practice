@@ -13,7 +13,7 @@ ENV DISPLAY :1
 
 WORKDIR /app
 ADD . /app
-RUN pip install -e .
+RUN pip3 install -e .
 
 RUN echo 'exec "$@"' >> /entrypoint.sh
 ENTRYPOINT ["bash", "/entrypoint.sh"]
