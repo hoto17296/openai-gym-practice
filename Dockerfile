@@ -3,8 +3,8 @@ FROM python:3.5
 RUN apt update && apt install -y xvfb libglu1-mesa
 
 # create fake display
-RUN echo 'rm -f /tmp/.X*-lock && Xvfb :1 -screen 0 800x600x24 +extension GLX &' >> /entrypoint.sh
-ENV DISPLAY :1
+RUN echo 'rm -f /tmp/.X*-lock && Xvfb :0 -screen 0 800x600x24 +extension GLX &' >> /entrypoint.sh
+ENV DISPLAY :0
 
 WORKDIR /app
 ADD . /app
